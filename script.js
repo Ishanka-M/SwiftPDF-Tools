@@ -1,29 +1,40 @@
-// Slider එකේ වෙනස්කම් පෙන්වීමට
+// Status පෙන්වීමට
+const updateStatus = (msg, isError = false) => {
+    const el = document.getElementById('statusIndicator');
+    el.innerText = msg;
+    el.className = isError ? "px-4 py-1 rounded-full text-xs font-bold bg-red-900/20 text-red-400 border border-red-700" : "px-4 py-1 rounded-full text-xs font-bold bg-emerald-900/20 text-emerald-400 border border-emerald-700";
+};
+
+// Slider එකේ අකුරු වෙනස් කිරීමට
 document.getElementById('compLevel').addEventListener('input', function() {
     const display = document.getElementById('levelDisplay');
-    const levels = { "1": "LOW (Good Quality)", "2": "MEDIUM (Balanced)", "3": "ULTRA (Under 200KB Target)" };
-    display.innerText = levels[this.value];
+    const val = this.value;
+    if(val == "1") display.innerText = "LOW (Best Quality)";
+    if(val == "2") display.innerText = "MEDIUM (Balanced)";
+    if(val == "3") display.innerText = "ULTRA (Smallest Size)";
 });
 
 async function handleCompress() {
     const fileInput = document.getElementById('pdfInput');
-    const compLevel = document.getElementById('compLevel').value; // 1, 2, or 3
+    const compLevel = document.getElementById('compLevel').value; // Slider එකේ අගය
     
     if (!fileInput.files[0]) return alert("කරුණාකර PDF එකක් තෝරන්න!");
 
     const file = fileInput.files[0];
-    updateStatus("Compression Level පද්ධතිය ක්‍රියාත්මකයි...");
+    updateStatus("Processing... Please wait.");
 
-    // Compression Settings තීරණය කිරීම
-    let scaleVal = 1.5; // DPI Scale
-    let qualityVal = 0.7; // JPEG Quality
+    // මට්ටම අනුව DPI සහ Quality තෝරා ගැනීම
+    let scaleVal, qualityVal;
 
     if (compLevel === "1") {
-        scaleVal = 1.5; qualityVal = 0.8; // Low compression
+        scaleVal = 1.5;   // වැඩි DPI (පැහැදිලියි)
+        qualityVal = 0.8; // වැඩි Quality
     } else if (compLevel === "2") {
-        scaleVal = 1.0; qualityVal = 0.5; // Medium
-    } else if (compLevel === "3") {
-        scaleVal = 0.7; qualityVal = 0.2; // Ultra (Maximum reduction)
+        scaleVal = 0.9;   // මධ්‍යම DPI
+        qualityVal = 0.5; // මධ්‍යම Quality
+    } else {
+        scaleVal = 0.5;   // ඉතා අඩු DPI (72 DPI වලටත් අඩුයි - 199KB සඳහා)
+        qualityVal = 0.15; // ඉතා අඩු Quality
     }
 
     try {
@@ -33,13 +44,15 @@ async function handleCompress() {
         
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         const { jsPDF } = window.jspdf;
+        
+        // අලුත් PDF එක සෑදීම
         const outPdf = new jsPDF('p', 'mm', 'a4');
 
         for (let i = 1; i <= pdf.numPages; i++) {
-            updateStatus(`Processing: Page ${i} of ${pdf.numPages}...`);
+            updateStatus(`Processing Page ${i} of ${pdf.numPages}...`);
             
             const page = await pdf.getPage(i);
-            const viewport = page.getViewport({ scale: scaleVal });
+            const viewport = page.getViewport({ scale: scaleVal }); // මෙන්න මෙතැනින් DPI එක වෙනස් වේ
             
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
@@ -48,7 +61,7 @@ async function handleCompress() {
 
             await page.render({ canvasContext: context, viewport: viewport }).promise;
 
-            // තෝරාගත් Quality එක අනුව JPEG එක සෑදීම
+            // JPEG බවට හරවා Quality එක අඩු කිරීම
             const imgData = canvas.toDataURL('image/jpeg', qualityVal);
             
             if (i > 1) outPdf.addPage();
@@ -56,7 +69,7 @@ async function handleCompress() {
             const pdfWidth = outPdf.internal.pageSize.getWidth();
             const pdfHeight = outPdf.internal.pageSize.getHeight();
             
-            // පින්තූරය පිටුවට සරිලන සේ ඇතුළත් කිරීම
+            // පින්තූරය ඇතුළත් කිරීම
             outPdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
             canvas.remove();
         }
@@ -64,8 +77,9 @@ async function handleCompress() {
         const pdfBlob = outPdf.output('blob');
         const finalSize = (pdfBlob.size / 1024).toFixed(2);
         
-        updateStatus(`නිමයි! නව ප්‍රමාණය: ${finalSize} KB`);
+        updateStatus(`Done! Size: ${finalSize} KB`);
 
+        // ස්වයංක්‍රීයව Download කිරීම
         const url = URL.createObjectURL(pdfBlob);
         const a = document.createElement("a");
         a.href = url;
@@ -78,3 +92,5 @@ async function handleCompress() {
         updateStatus("Error: " + err.message, true);
     }
 }
+
+// අනෙක් Tools සඳහා කේත මෙතැනින් පසුව...
