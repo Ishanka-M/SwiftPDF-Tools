@@ -3,56 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftPDF Pro | Advanced PDF Tools</title>
+    <title>SwiftPDF Pro | Ultra Low Compression & Tools</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
+<body class="bg-gray-900 text-gray-100 min-h-screen font-sans">
 
-    <nav class="p-6 border-b border-gray-800 bg-gray-900 sticky top-0 z-50">
+    <nav class="p-6 border-b border-gray-800 bg-gray-900 sticky top-0 z-50 shadow-xl">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">SwiftPDF Pro</h1>
-            <div id="statusIndicator" class="text-sm font-medium text-gray-400">Ready</div>
+            <div class="flex items-center space-x-2">
+                <span class="text-3xl">🚀</span>
+                <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                    SwiftPDF Pro
+                </h1>
+            </div>
+            <div id="statusIndicator" class="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-gray-800 text-gray-400 border border-gray-700">
+                Ready to Process
+            </div>
         </div>
     </nav>
 
-    <main class="container mx-auto py-10 px-4">
-        <section class="mb-12 bg-gray-800 p-8 rounded-2xl shadow-2xl border border-blue-500/30">
-            <div class="flex items-center mb-6">
-                <div class="bg-blue-500 p-3 rounded-lg mr-4">🚀</div>
-                <h2 class="text-2xl font-bold">High-Efficiency PDF Compressor</h2>
-            </div>
+    <main class="container mx-auto py-10 px-4 max-w-4xl">
+        
+        <section class="mb-10 bg-gray-800 p-8 rounded-3xl shadow-2xl border border-blue-500/20 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold">PDF</div>
             
-            <input type="file" id="pdfInput" accept="application/pdf" class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer mb-6">
-            
-            <div class="mb-6">
-                <label class="block mb-2 font-medium">Compression Level: <span id="levelLabel">Medium</span></label>
-                <input type="range" id="compLevel" min="0.1" max="0.9" step="0.1" value="0.5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
-                <div class="flex justify-between text-xs text-gray-500 mt-2 italic">
-                    <span>Smaller Size</span>
-                    <span>Higher Quality</span>
-                </div>
-            </div>
+            <div class="relative z-10">
+                <h2 class="text-2xl font-bold mb-2 flex items-center">
+                    <span class="mr-3">📉</span> Aggressive PDF Compressor
+                </h2>
+                <p class="text-gray-400 mb-8 text-sm italic">Targeted for under 200KB reduction using DPI scaling.</p>
 
-            <button onclick="handleCompress()" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all transform hover:scale-[1.01]">Compress & Download</button>
+                <div class="mb-8">
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Select PDF File</label>
+                    <input type="file" id="pdfInput" accept="application/pdf" 
+                        class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer transition-all">
+                </div>
+
+                <div class="mb-8 bg-gray-900/50 p-6 rounded-2xl border border-gray-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="font-bold text-blue-300">Compression Level</label>
+                        <span id="levelDisplay" class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-bold">MEDIUM (Balanced)</span>
+                    </div>
+                    <input type="range" id="compLevel" min="1" max="3" step="1" value="2" 
+                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-3 font-mono uppercase tracking-tighter">
+                        <span>High Quality</span>
+                        <span>Optimized</span>
+                        <span>Ultra Small (72 DPI)</span>
+                    </div>
+                </div>
+
+                <button onclick="handleCompress()" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-blue-500 py-4 rounded-2xl font-black text-lg shadow-lg shadow-blue-900/20 hover:from-blue-500 hover:to-blue-400 transition-all transform hover:-translate-y-1 active:scale-95">
+                    COMPRESS & DOWNLOAD
+                </button>
+            </div>
         </section>
 
         <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
-                <h3 class="text-xl font-bold mb-4 flex items-center">🖼️ Image to PDF</h3>
-                <input type="file" id="imgInput" multiple accept="image/*" class="w-full mb-4">
-                <button onclick="handleImgToPdf()" class="w-full bg-gray-700 py-2 rounded-lg hover:bg-gray-600">Convert Images</button>
+            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 hover:border-emerald-500/30 transition-colors">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <span class="mr-2">🖼️</span> Image to PDF
+                </h3>
+                <input type="file" id="imgInput" multiple accept="image/*" class="text-xs text-gray-500 mb-4 w-full">
+                <button onclick="handleImgToPdf()" class="w-full bg-gray-700 py-3 rounded-xl text-sm font-bold hover:bg-gray-600 transition-all">Convert Images</button>
             </div>
             
-            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
-                <h3 class="text-xl font-bold mb-4 flex items-center">📄 PDF to Image</h3>
-                <input type="file" id="pdfToImgInput" accept="application/pdf" class="w-full mb-4">
-                <button onclick="handlePdfToImg()" class="w-full bg-gray-700 py-2 rounded-lg hover:bg-gray-600">Extract Pages</button>
+            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 hover:border-purple-500/30 transition-colors">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <span class="mr-2">📸</span> PDF to Image
+                </h3>
+                <input type="file" id="pdfToImgInput" accept="application/pdf" class="text-xs text-gray-500 mb-4 w-full">
+                <button onclick="handlePdfToImg()" class="w-full bg-gray-700 py-3 rounded-xl text-sm font-bold hover:bg-gray-600 transition-all">Extract First Page</button>
             </div>
         </div>
+
+        <footer class="mt-12 text-center text-gray-600 text-[10px] uppercase tracking-[0.2em]">
+            &copy; 2024 SwiftPDF Pro | Client-Side Processing (Private & Secure)
+        </footer>
     </main>
 
     <script src="script.js"></script>
