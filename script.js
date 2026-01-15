@@ -21,12 +21,10 @@ async function handleCompress() {
 
     try {
         if (compLevel === "3") {
-            // ULTRA MODE: 199KB සඳහා පිටු පින්තූර බවට හරවයි (Flattening)
-            updateStatus("Ultra Mode: Scaling DPI to minimum...");
-            await compressUltra(arrayBuffer);
+            updateStatus("Ultra Mode: Auto-adjusting for 199KB limit...");
+            await compressUltraAuto(arrayBuffer);
         } else {
-            // LEVEL 1 & 2: අකුරු වල පැහැදිලි බව (Vector) ආරක්ෂා කර Compress කරයි
-            updateStatus("Optimization Mode: Preserving Text Quality...");
+            updateStatus("Optimization Mode: Quality Preserved.");
             await compressVector(arrayBuffer, compLevel);
         }
     } catch (err) {
@@ -35,42 +33,35 @@ async function handleCompress() {
     }
 }
 
-// 1. Quality එක ආරක්ෂා කරන ක්‍රමය (Level 1 & 2)
-async function compressVector(buffer, level) {
-    const { PDFDocument } = PDFLib;
-    const pdfDoc = await PDFDocument.load(buffer);
-    
-    // අනවශ්‍ය දත්ත ඉවත් කිරීම
-    pdfDoc.setTitle("");
-    pdfDoc.setAuthor("");
-    
-    const compressedBytes = await pdfDoc.save({
-        useObjectStreams: true, // ව්‍යුහය ප්‍රශස්ත කරයි
-        addDefaultPage: false
-    });
-
-    const blob = new Blob([compressedBytes], { type: "application/pdf" });
-    if (blob.size >= buffer.byteLength && level == "1") {
-        updateStatus("Already Optimized!");
-        downloadFile(new Blob([buffer]), "Original_Optimized.pdf");
-    } else {
-        finishDownload(blob);
-    }
-}
-
-// 2. 199KB සඳහා වන Ultra ක්‍රමය (Level 3)
-async function compressUltra(buffer) {
+// 1. පිටු ගණන අනුව DPI පාලනය වන Ultra Mode
+async function compressUltraAuto(buffer) {
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     
     const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
     const { jsPDF } = window.jspdf;
-    const outPdf = new jsPDF('p', 'mm', 'a4');
+    const totalPages = pdf.numPages;
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-        updateStatus(`Ultra Compressing: Page ${i}...`);
+    // --- Dynamic Scaling Logic ---
+    // පිටු ගණන වැඩි වන විට DPI (scale) සහ Quality එක ස්වයංක්‍රීයව අඩු කරයි
+    let scaleVal = 0.5;
+    let qualityVal = 0.2;
+
+    if (totalPages > 10) {
+        scaleVal = 0.3; // පිටු 10 ට වැඩි නම් DPI ගොඩක් අඩු කරයි
+        qualityVal = 0.1;
+    }
+    if (totalPages > 30) {
+        scaleVal = 0.2; // පිටු 30 ට වැඩි නම් ඉතාම අඩු DPI භාවිතා කරයි
+        qualityVal = 0.05;
+    }
+
+    const outPdf = new jsPDF({ compress: true });
+
+    for (let i = 1; i <= totalPages; i++) {
+        updateStatus(`Processing Page ${i} / ${totalPages} (Auto-scaling applied)`);
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 0.6 }); // DPI ගොඩක් අඩු කරයි
+        const viewport = page.getViewport({ scale: scaleVal });
         
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -78,7 +69,7 @@ async function compressUltra(buffer) {
         canvas.width = viewport.width;
 
         await page.render({ canvasContext: context, viewport: viewport }).promise;
-        const imgData = canvas.toDataURL('image/jpeg', 0.15); // Quality එක ගොඩක් අඩු කරයි
+        const imgData = canvas.toDataURL('image/jpeg', qualityVal);
         
         if (i > 1) outPdf.addPage();
         outPdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
@@ -87,20 +78,20 @@ async function compressUltra(buffer) {
     finishDownload(outPdf.output('blob'));
 }
 
-function finishDownload(blob) {
-    const size = (blob.size / 1024).toFixed(2);
-    updateStatus(`Success! Size: ${size} KB`);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `SwiftPDF_Result_${size}KB.pdf`;
-    a.click();
+// 2. Vector Optimization (Level 1 & 2)
+async function compressVector(buffer, level) {
+    const { PDFDocument } = PDFLib;
+    const pdfDoc = await PDFDocument.load(buffer);
+    const compressedBytes = await pdfDoc.save({ useObjectStreams: true });
+    finishDownload(new Blob([compressedBytes], { type: "application/pdf" }));
 }
 
-function downloadFile(blob, name) {
+function finishDownload(blob) {
+    const size = (blob.size / 1024).toFixed(2);
+    updateStatus(`Done! New Size: ${size} KB`);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = name;
+    a.download = `SwiftPDF_${size}KB.pdf`;
     a.click();
 }
