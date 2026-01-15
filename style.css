@@ -1,15 +1,156 @@
-.card {
-  @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 flex flex-col gap-3;
+/* Custom styles for SwiftPDF Pro */
+
+/* Toggle switch styling */
+#themeToggle .toggle-circle {
+    transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
-.card h2 {
-  @apply text-lg font-semibold;
+#themeToggle.active .toggle-circle {
+    transform: translateX(28px);
+    background-color: #3b82f6;
 }
 
-.card input {
-  @apply text-sm;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
 
-.card button {
-  @apply bg-blue-600 hover:bg-blue-700 text-white py-2 rounded;
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: #374151;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #6b7280;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Animation for progress bar */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.compressing {
+    animation: pulse 1.5s infinite;
+}
+
+/* File upload area hover effect */
+.border-dashed:hover {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.dark .border-dashed:hover {
+    border-color: #60a5fa;
+    background-color: rgba(96, 165, 250, 0.05);
+}
+
+/* Tool card hover effect */
+.bg-white, .dark .bg-gray-800 {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bg-white:hover, .dark .bg-gray-800:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Loading spinner */
+.spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid #fff;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Image preview in list */
+.image-list-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: white;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border-left: 4px solid #3b82f6;
+}
+
+.dark .image-list-item {
+    background-color: #4b5563;
+    border-left-color: #60a5fa;
+}
+
+.image-list-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Extracted image thumbnail */
+.extracted-image {
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.extracted-image:hover {
+    transform: scale(1.05);
+    border-color: #3b82f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .grid {
+        gap: 1.5rem;
+    }
+}
+
+/* Button focus styles */
+button:focus, input:focus, select:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Utility classes */
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
 }
