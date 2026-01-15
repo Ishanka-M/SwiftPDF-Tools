@@ -1,97 +1,123 @@
+// Function to update the status bar
 const updateStatus = (msg, isError = false) => {
     const el = document.getElementById('statusIndicator');
-    if (!el) return;
     el.innerText = msg;
     el.className = isError 
-        ? "px-4 py-1 rounded-full text-xs font-bold bg-red-900/20 text-red-400 border border-red-700" 
-        : "px-4 py-1 rounded-full text-xs font-bold bg-emerald-900/20 text-emerald-400 border border-emerald-700";
+        ? "status-badge border-red-500 text-red-400 bg-red-900/20" 
+        : "status-badge border-emerald-500 text-emerald-400 bg-emerald-900/20";
 };
 
+// Sync slider labels
+document.getElementById('compLevel').addEventListener('input', function() {
+    const labels = { "1": "LOW (Best Quality)", "2": "MEDIUM (Balanced)", "3": "ULTRA (Target 199KB)" };
+    document.getElementById('levelDisplay').innerText = labels[this.value];
+});
+
+// --- TOOL 1: PDF COMPRESSOR ---
 async function handleCompress() {
     const fileInput = document.getElementById('pdfInput');
     const compLevel = document.getElementById('compLevel').value;
+    if (!fileInput.files[0]) return alert("Please select a PDF!");
+
+    updateStatus("Processing Compressor...");
+    const arrayBuffer = await fileInput.files[0].arrayBuffer();
     
-    if (!fileInput || !fileInput.files[0]) {
-        alert("කරුණාකර PDF එකක් තෝරන්න!");
-        return;
-    }
-
-    const file = fileInput.files[0];
-    const arrayBuffer = await file.arrayBuffer();
-
-    try {
-        if (compLevel === "3") {
-            updateStatus("Ultra Mode: Auto-adjusting for 199KB limit...");
-            await compressUltraAuto(arrayBuffer);
-        } else {
-            updateStatus("Optimization Mode: Quality Preserved.");
-            await compressVector(arrayBuffer, compLevel);
-        }
-    } catch (err) {
-        console.error(err);
-        updateStatus("Error: " + err.message, true);
-    }
-}
-
-// 1. පිටු ගණන අනුව DPI පාලනය වන Ultra Mode
-async function compressUltraAuto(buffer) {
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     
-    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     const { jsPDF } = window.jspdf;
-    const totalPages = pdf.numPages;
+    
+    // Create new PDF with internal compression enabled
+    const outPdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4', compress: true });
 
-    // --- Dynamic Scaling Logic ---
-    // පිටු ගණන වැඩි වන විට DPI (scale) සහ Quality එක ස්වයංක්‍රීයව අඩු කරයි
-    let scaleVal = 0.5;
-    let qualityVal = 0.2;
-
-    if (totalPages > 10) {
-        scaleVal = 0.3; // පිටු 10 ට වැඩි නම් DPI ගොඩක් අඩු කරයි
-        qualityVal = 0.1;
-    }
-    if (totalPages > 30) {
-        scaleVal = 0.2; // පිටු 30 ට වැඩි නම් ඉතාම අඩු DPI භාවිතා කරයි
-        qualityVal = 0.05;
-    }
-
-    const outPdf = new jsPDF({ compress: true });
-
-    for (let i = 1; i <= totalPages; i++) {
-        updateStatus(`Processing Page ${i} / ${totalPages} (Auto-scaling applied)`);
+    for (let i = 1; i <= pdf.numPages; i++) {
+        updateStatus(`Compressing Page ${i}/${pdf.numPages}...`);
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: scaleVal });
         
+        // Smart Scaling Logic for clarity vs size
+        let scale = (compLevel === "3") ? 1.2 : 1.8;
+        let quality = (compLevel === "3") ? 0.25 : 0.6;
+
+        const viewport = page.getViewport({ scale: scale });
         const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
         canvas.height = viewport.height;
         canvas.width = viewport.width;
+        
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
-        await page.render({ canvasContext: context, viewport: viewport }).promise;
-        const imgData = canvas.toDataURL('image/jpeg', qualityVal);
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        const imgData = canvas.toDataURL('image/jpeg', quality);
         
         if (i > 1) outPdf.addPage();
-        outPdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+        outPdf.addImage(imgData, 'JPEG', 0, 0, outPdf.internal.pageSize.getWidth(), outPdf.internal.pageSize.getHeight(), undefined, 'MEDIUM');
         canvas.remove();
     }
-    finishDownload(outPdf.output('blob'));
+    
+    const blob = outPdf.output('blob');
+    const sizeKB = (blob.size / 1024).toFixed(2);
+    updateStatus(`Success! Final Size: ${sizeKB} KB`);
+    downloadFile(blob, `SwiftPDF_Compressed_${sizeKB}KB.pdf`);
 }
 
-// 2. Vector Optimization (Level 1 & 2)
-async function compressVector(buffer, level) {
-    const { PDFDocument } = PDFLib;
-    const pdfDoc = await PDFDocument.load(buffer);
-    const compressedBytes = await pdfDoc.save({ useObjectStreams: true });
-    finishDownload(new Blob([compressedBytes], { type: "application/pdf" }));
+// --- TOOL 2: IMAGE TO PDF ---
+async function handleImgToPdf() {
+    const input = document.getElementById('imgInput');
+    if (!input.files.length) return alert("Select images first!");
+    updateStatus("Building PDF from Images...");
+    
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    
+    for (let i = 0; i < input.files.length; i++) {
+        const dataUrl = await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(input.files[i]);
+        });
+        if (i > 0) pdf.addPage();
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, 210, 297);
+    }
+    pdf.save("SwiftPDF_Images.pdf");
+    updateStatus("Images Converted Successfully!");
 }
 
-function finishDownload(blob) {
-    const size = (blob.size / 1024).toFixed(2);
-    updateStatus(`Done! New Size: ${size} KB`);
+// --- TOOL 3: PDF TO IMAGE ---
+async function handlePdfToImg() {
+    const input = document.getElementById('pdfToImgInput');
+    if (!input.files[0]) return alert("Select a PDF file!");
+    updateStatus("Extracting Pages as Images...");
+    
+    const buffer = await input.files[0].arrayBuffer();
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 2.0 });
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        
+        const link = document.createElement('a');
+        link.download = `Page_${i}.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.click();
+    }
+    updateStatus("All Pages Extracted!");
+}
+
+// Helper: Download function
+function downloadFile(blob, name) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `SwiftPDF_${size}KB.pdf`;
+    a.download = name;
     a.click();
+    URL.revokeObjectURL(url);
 }
