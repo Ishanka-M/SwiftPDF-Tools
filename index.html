@@ -3,12 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftPDF Pro | Ultra Low Compression & Tools</title>
+    <title>SwiftPDF Pro | Ultra Compressor</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Slider එක අලංකාර කිරීමට */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+    </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans">
 
@@ -16,77 +29,69 @@
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <span class="text-3xl">🚀</span>
-                <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent uppercase tracking-tighter">
                     SwiftPDF Pro
                 </h1>
             </div>
-            <div id="statusIndicator" class="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-gray-800 text-gray-400 border border-gray-700">
+            <div id="statusIndicator" class="px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gray-800 text-gray-400 border border-gray-700">
                 Ready to Process
             </div>
         </div>
     </nav>
 
-    <main class="container mx-auto py-10 px-4 max-w-4xl">
+    <main class="container mx-auto py-10 px-4 max-w-2xl">
         
-        <section class="mb-10 bg-gray-800 p-8 rounded-3xl shadow-2xl border border-blue-500/20 relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl font-bold">PDF</div>
-            
-            <div class="relative z-10">
-                <h2 class="text-2xl font-bold mb-2 flex items-center">
-                    <span class="mr-3">📉</span> Aggressive PDF Compressor
-                </h2>
-                <p class="text-gray-400 mb-8 text-sm italic">Targeted for under 200KB reduction using DPI scaling.</p>
+        <div class="bg-gray-800 rounded-3xl shadow-2xl border border-blue-500/20 p-8">
+            <h2 class="text-xl font-bold mb-6 flex items-center">
+                <span class="bg-blue-500/20 p-2 rounded-lg mr-3 text-blue-400">📉</span>
+                Ultra PDF Compressor (Target 199KB)
+            </h2>
 
-                <div class="mb-8">
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Select PDF File</label>
-                    <input type="file" id="pdfInput" accept="application/pdf" 
-                        class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer transition-all">
-                </div>
-
-                <div class="mb-8 bg-gray-900/50 p-6 rounded-2xl border border-gray-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <label class="font-bold text-blue-300">Compression Level</label>
-                        <span id="levelDisplay" class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-bold">MEDIUM (Balanced)</span>
+            <div class="mb-8 p-6 border-2 border-dashed border-gray-700 rounded-2xl hover:border-blue-500/50 transition-all bg-gray-900/30">
+                <label class="block text-center cursor-pointer">
+                    <span class="text-gray-400 text-sm block mb-2">ඔබේ PDF ගොනුව මෙතැනට ඇතුළත් කරන්න</span>
+                    <input type="file" id="pdfInput" accept="application/pdf" class="hidden">
+                    <div class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-bold inline-block transition-all">
+                        Select File
                     </div>
-                    <input type="range" id="compLevel" min="1" max="3" step="1" value="2" 
-                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
-                    <div class="flex justify-between text-[10px] text-gray-500 mt-3 font-mono uppercase tracking-tighter">
-                        <span>High Quality</span>
-                        <span>Optimized</span>
-                        <span>Ultra Small (72 DPI)</span>
-                    </div>
+                </label>
+                <div id="fileName" class="text-center text-xs text-blue-400 mt-3 font-mono">ගොනුවක් තෝරා නැත</div>
+            </div>
+
+            <div class="mb-8 bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
+                <div class="flex justify-between items-center mb-4">
+                    <label class="text-sm font-bold text-gray-300">Compression Level</label>
+                    <span id="levelDisplay" class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-[10px] font-black uppercase">MEDIUM (Balanced)</span>
                 </div>
+                <input type="range" id="compLevel" min="1" max="3" step="1" value="2" 
+                    class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                <div class="flex justify-between text-[10px] text-gray-500 mt-4 font-bold uppercase tracking-widest">
+                    <span>Quality</span>
+                    <span>Optimized</span>
+                    <span class="text-emerald-500">Ultra Small</span>
+                </div>
+            </div>
 
-                <button onclick="handleCompress()" 
-                    class="w-full bg-gradient-to-r from-blue-600 to-blue-500 py-4 rounded-2xl font-black text-lg shadow-lg shadow-blue-900/20 hover:from-blue-500 hover:to-blue-400 transition-all transform hover:-translate-y-1 active:scale-95">
-                    COMPRESS & DOWNLOAD
-                </button>
-            </div>
-        </section>
+            <button onclick="handleCompress()" id="compressBtn"
+                class="w-full bg-gradient-to-br from-blue-600 to-blue-700 py-4 rounded-2xl font-black text-lg shadow-lg hover:from-blue-500 hover:to-blue-600 transition-all transform active:scale-95 flex justify-center items-center space-x-2">
+                <span>COMPRESS & DOWNLOAD</span>
+            </button>
 
-        <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 hover:border-emerald-500/30 transition-colors">
-                <h3 class="text-lg font-bold mb-4 flex items-center">
-                    <span class="mr-2">🖼️</span> Image to PDF
-                </h3>
-                <input type="file" id="imgInput" multiple accept="image/*" class="text-xs text-gray-500 mb-4 w-full">
-                <button onclick="handleImgToPdf()" class="w-full bg-gray-700 py-3 rounded-xl text-sm font-bold hover:bg-gray-600 transition-all">Convert Images</button>
-            </div>
-            
-            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 hover:border-purple-500/30 transition-colors">
-                <h3 class="text-lg font-bold mb-4 flex items-center">
-                    <span class="mr-2">📸</span> PDF to Image
-                </h3>
-                <input type="file" id="pdfToImgInput" accept="application/pdf" class="text-xs text-gray-500 mb-4 w-full">
-                <button onclick="handlePdfToImg()" class="w-full bg-gray-700 py-3 rounded-xl text-sm font-bold hover:bg-gray-600 transition-all">Extract First Page</button>
-            </div>
+            <p class="text-[10px] text-center text-gray-600 mt-6 leading-relaxed">
+                *අතිශය විශාල PDF වලදී 199KB සීමාවට පැමිණීමට 'ULTRA' මට්ටම භාවිතා කරන්න.<br>
+                සියලුම සැකසුම් ඔබගේ Browser එක තුළම සිදුවේ (Safe & Private).
+            </p>
         </div>
-
-        <footer class="mt-12 text-center text-gray-600 text-[10px] uppercase tracking-[0.2em]">
-            &copy; 2024 SwiftPDF Pro | Client-Side Processing (Private & Secure)
-        </footer>
     </main>
 
     <script src="script.js"></script>
+
+    <script>
+        // File එකක් තේරූ විට නම පෙන්වීමට
+        document.getElementById('pdfInput').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : "ගොනුවක් තෝරා නැත";
+            document.getElementById('fileName').innerText = fileName;
+        });
+    </script>
 </body>
 </html>
