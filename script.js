@@ -1,4 +1,3 @@
-// Status පෙන්වීමට සහාය වන function එක
 const updateStatus = (msg, isError = false) => {
     const el = document.getElementById('statusIndicator');
     if (!el) return;
@@ -7,18 +6,6 @@ const updateStatus = (msg, isError = false) => {
         ? "px-4 py-1 rounded-full text-xs font-bold bg-red-900/20 text-red-400 border border-red-700" 
         : "px-4 py-1 rounded-full text-xs font-bold bg-emerald-900/20 text-emerald-400 border border-emerald-700";
 };
-
-// Slider එකේ අකුරු වෙනස් කිරීම
-const compSlider = document.getElementById('compLevel');
-if (compSlider) {
-    compSlider.addEventListener('input', function() {
-        const display = document.getElementById('levelDisplay');
-        const val = this.value;
-        if(val == "1") display.innerText = "LOW (Best Quality)";
-        if(val == "2") display.innerText = "MEDIUM (Balanced)";
-        if(val == "3") display.innerText = "ULTRA (Smallest Size)";
-    });
-}
 
 async function handleCompress() {
     const fileInput = document.getElementById('pdfInput');
@@ -30,73 +17,58 @@ async function handleCompress() {
     }
 
     const file = fileInput.files[0];
-    updateStatus("Processing... Please wait.");
-
-    // Compression Levels
-    let scaleVal, qualityVal;
-    if (compLevel === "1") { scaleVal = 1.2; qualityVal = 0.7; }
-    else if (compLevel === "2") { scaleVal = 0.8; qualityVal = 0.4; }
-    else { scaleVal = 0.5; qualityVal = 0.15; } // Ultra Low DPI
+    updateStatus("Optimizing PDF Structure...");
 
     try {
         const arrayBuffer = await file.arrayBuffer();
         
-        // PDF.js නිවැරදිව සැකසීම
-        const pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        // මෙවර අපි භාවිතා කරන්නේ pdf-lib (Structure එක රැක ගැනීමට)
+        // මේ සඳහා index.html හි head එකට පහත script එක ඇති බව සහතික කරගන්න:
+        // <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
         
-        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-        const pdf = await loadingTask.promise;
+        const { PDFDocument } = PDFLib;
+        const pdfDoc = await PDFDocument.load(arrayBuffer);
         
-        const { jsPDF } = window.jspdf;
-        const outPdf = new jsPDF('p', 'mm', 'a4');
+        // 1. අනවශ්‍ය Metadata ඉවත් කිරීම (Size අඩු කිරීමට ප්‍රධාන පියවරක්)
+        pdfDoc.setTitle("");
+        pdfDoc.setAuthor("");
+        pdfDoc.setSubject("");
+        pdfDoc.setCreator("");
 
-        for (let i = 1; i <= pdf.numPages; i++) {
-            updateStatus(`Processing Page ${i} of ${pdf.numPages}...`);
-            
-            const page = await pdf.getPage(i);
-            const viewport = page.getViewport({ scale: scaleVal });
-            
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+        // 2. Slider එකේ අගය අනුව Compression settings තීරණය කිරීම
+        // 'useObjectStreams' මගින් මුල් ගොනුවේ ගුණාත්මකභාවයට හානි නොකර size එක අඩු කරයි
+        const shouldCompressStreams = (compLevel >= 2); 
 
-            await page.render({ canvasContext: context, viewport: viewport }).promise;
+        const compressedBytes = await pdfDoc.save({
+            useObjectStreams: shouldCompressStreams,
+            addDefaultPage: false,
+            preserveRawResponses: false
+        });
 
-            const imgData = canvas.toDataURL('image/jpeg', qualityVal);
-            
-            if (i > 1) outPdf.addPage();
-            
-            const pdfWidth = outPdf.internal.pageSize.getWidth();
-            const pdfHeight = outPdf.internal.pageSize.getHeight();
-            
-            outPdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-            canvas.remove();
-        }
-
-        // PDF එක Blob එකක් ලෙස ලබා ගැනීම
-        const pdfBlob = outPdf.output('blob');
+        const pdfBlob = new Blob([compressedBytes], { type: "application/pdf" });
         const finalSize = (pdfBlob.size / 1024).toFixed(2);
         
-        updateStatus(`Done! Size: ${finalSize} KB`);
-
-        // ස්ථාවර Download ක්‍රමය
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement("a");
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `SwiftPDF_${finalSize}KB.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 100);
+        // පරීක්ෂාව: මුල් ගොනුවට වඩා විශාල නම් මුල් ගොනුවම ලබා දෙන්න
+        if (pdfBlob.size >= file.size && compLevel == 1) {
+            updateStatus("Original is already optimized!", false);
+            downloadFile(new Blob([arrayBuffer]), file.name);
+        } else {
+            updateStatus(`Done! Optimized to: ${finalSize} KB`);
+            downloadFile(pdfBlob, `SwiftPDF_Optimized_${file.name}`);
+        }
 
     } catch (err) {
         console.error("Compression Error:", err);
         updateStatus("Error: " + err.message, true);
     }
+}
+
+function downloadFile(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 100);
 }
