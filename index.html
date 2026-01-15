@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftPDF Tools - Professional PDF Utilities</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- JS Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md py-4 px-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-file-pdf text-blue-600 text-2xl"></i>
+                <h1 class="text-2xl font-bold text-gray-800">SwiftPDF Tools</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="https://github.com" target="_blank" class="text-gray-600 hover:text-blue-600">
+                    <i class="fab fa-github text-xl"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section py-16 px-4 text-center">
+        <div class="container mx-auto max-w-4xl">
+            <h1 class="text-5xl font-bold text-gray-800 mb-6">SwiftPDF Tools</h1>
+            <p class="text-xl text-gray-600 mb-10">Professional, client-side PDF utilities. Convert images to PDF and compress PDF files directly in your browser.</p>
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <a href="#image-to-pdf" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300">
+                    <i class="fas fa-image mr-2"></i>Image to PDF
+                </a>
+                <a href="#pdf-compressor" class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300">
+                    <i class="fas fa-compress-alt mr-2"></i>PDF Compressor
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pb-16 max-w-6xl">
+        <!-- Image to PDF Converter -->
+        <section id="image-to-pdf" class="mb-16 bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center mb-8">
+                <div class="bg-blue-100 p-3 rounded-lg mr-4">
+                    <i class="fas fa-image text-blue-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800">Image to PDF Converter</h2>
+                    <p class="text-gray-600">Upload multiple images and combine them into a single PDF file.</p>
+                </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div id="imageUploadArea" class="upload-area border-2 border-dashed border-gray-300 rounded-xl p-10 text-center mb-8 transition-all duration-300">
+                <i class="fas fa-cloud-upload-alt text-gray-400 text-5xl mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">Drag & Drop Images Here</h3>
+                <p class="text-gray-500 mb-6">or click to browse files</p>
+                <input type="file" id="imageInput" accept="image/*" multiple class="hidden">
+                <button id="browseImagesBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                    Browse Images
+                </button>
+                <p class="text-gray-400 text-sm mt-4">Supports JPG, PNG, GIF, BMP, and WebP</p>
+            </div>
+
+            <!-- Selected Images Preview -->
+            <div id="imagePreview" class="mb-8 hidden">
+                <h3 class="text-xl font-medium text-gray-700 mb-4">Selected Images (<span id="imageCount">0</span>)</h3>
+                <div id="imageList" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <!-- Images will be added here dynamically -->
+                </div>
+                <div class="flex justify-between items-center">
+                    <button id="clearImagesBtn" class="text-red-600 hover:text-red-800 font-medium">
+                        <i class="fas fa-trash-alt mr-2"></i>Clear All
+                    </button>
+                    <div class="flex space-x-4">
+                        <button id="moveUpBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg">
+                            <i class="fas fa-arrow-up mr-2"></i>Move Up
+                        </button>
+                        <button id="moveDownBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg">
+                            <i class="fas fa-arrow-down mr-2"></i>Move Down
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversion Options -->
+            <div class="mb-8">
+                <h3 class="text-xl font-medium text-gray-700 mb-4">PDF Options</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Page Size</label>
+                        <select id="pageSize" class="w-full border border-gray-300 rounded-lg p-3">
+                            <option value="a4">A4 (210 × 297 mm)</option>
+                            <option value="letter">Letter (8.5 × 11 in)</option>
+                            <option value="legal">Legal (8.5 × 14 in)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Orientation</label>
+                        <select id="pageOrientation" class="w-full border border-gray-300 rounded-lg p-3">
+                            <option value="portrait">Portrait</option>
+                            <option value="landscape">Landscape</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="imageConversionProgress" class="hidden mb-8">
+                <div class="flex justify-between mb-2">
+                    <span class="text-gray-700">Processing images...</span>
+                    <span id="imageProgressPercent" class="text-gray-700">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="imageProgressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Convert Button -->
+            <div class="text-center">
+                <button id="convertToPdfBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <i class="fas fa-file-pdf mr-2"></i>Convert to PDF
+                </button>
+            </div>
+        </section>
+
+        <!-- PDF Compressor -->
+        <section id="pdf-compressor" class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center mb-8">
+                <div class="bg-green-100 p-3 rounded-lg mr-4">
+                    <i class="fas fa-compress-alt text-green-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800">PDF Compressor</h2>
+                    <p class="text-gray-600">Reduce PDF file size by re-rendering pages and scaling down content.</p>
+                </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div id="pdfUploadArea" class="upload-area border-2 border-dashed border-gray-300 rounded-xl p-10 text-center mb-8 transition-all duration-300">
+                <i class="fas fa-file-pdf text-gray-400 text-5xl mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">Drag & Drop PDF Here</h3>
+                <p class="text-gray-500 mb-6">or click to browse files</p>
+                <input type="file" id="pdfInput" accept=".pdf" class="hidden">
+                <button id="browsePdfBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                    Browse PDF
+                </button>
+                <p class="text-gray-400 text-sm mt-4">Max file size: 50 MB</p>
+            </div>
+
+            <!-- Selected PDF Preview -->
+            <div id="pdfPreview" class="mb-8 hidden">
+                <h3 class="text-xl font-medium text-gray-700 mb-4">Selected PDF</h3>
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                    <i class="fas fa-file-pdf text-red-600 text-3xl mr-4"></i>
+                    <div class="flex-grow">
+                        <h4 id="pdfFileName" class="font-medium text-gray-800 truncate"></h4>
+                        <p id="pdfFileSize" class="text-gray-600 text-sm"></p>
+                    </div>
+                    <button id="removePdfBtn" class="text-red-600 hover:text-red-800">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Compression Options -->
+            <div class="mb-8">
+                <h3 class="text-xl font-medium text-gray-700 mb-4">Compression Settings</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Quality Level</label>
+                        <select id="compressionLevel" class="w-full border border-gray-300 rounded-lg p-3">
+                            <option value="low">Low (Fastest, Larger Size)</option>
+                            <option value="medium" selected>Medium (Balanced)</option>
+                            <option value="high">High (Slowest, Smallest Size)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Scale Factor</label>
+                        <select id="scaleFactor" class="w-full border border-gray-300 rounded-lg p-3">
+                            <option value="1.0">No Scaling</option>
+                            <option value="0.9">90% (Recommended)</option>
+                            <option value="0.8">80%</option>
+                            <option value="0.7">70%</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Expected Compression</label>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p id="compressionEstimate" class="text-green-600 font-medium">~30-50% size reduction</p>
+                            <p class="text-gray-500 text-sm">Based on selected settings</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="pdfCompressionProgress" class="hidden mb-8">
+                <div class="flex justify-between mb-2">
+                    <span class="text-gray-700">Compressing PDF...</span>
+                    <span id="pdfProgressPercent" class="text-gray-700">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="pdfProgressBar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Compress Button -->
+            <div class="text-center">
+                <button id="compressPdfBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <i class="fas fa-compress-alt mr-2"></i>Compress PDF
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="mt-12 bg-white rounded-xl shadow-lg p-6 hidden">
+            <div class="flex items-center mb-6">
+                <div class="bg-purple-100 p-3 rounded-lg mr-4">
+                    <i class="fas fa-download text-purple-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Your File is Ready</h2>
+                    <p id="resultDescription" class="text-gray-600">Download your processed PDF file</p>
+                </div>
+            </div>
+
+            <div class="p-6 bg-gray-50 rounded-lg mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-file-pdf text-red-600 text-3xl mr-4"></i>
+                        <div>
+                            <h3 id="resultFileName" class="font-bold text-gray-800"></h3>
+                            <p id="resultFileSize" class="text-gray-600"></p>
+                        </div>
+                    </div>
+                    <div id="compressionResult" class="text-right hidden">
+                        <p class="text-green-600 font-bold" id="sizeReduction"></p>
+                        <p class="text-gray-500 text-sm">Size Reduction</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <a id="downloadResultBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">
+                    <i class="fas fa-download mr-2"></i>Download PDF
+                </a>
+                <button id="processAnotherBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition duration-300">
+                    <i class="fas fa-redo mr-2"></i>Process Another File
+                </button>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="mt-16">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-12">Why Choose SwiftPDF Tools</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="bg-blue-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-alt text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Secure & Private</h3>
+                    <p class="text-gray-600">All processing happens in your browser. Your files never leave your device.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="bg-green-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bolt text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Fast Processing</h3>
+                    <p class="text-gray-600">Optimized algorithms for quick conversion and compression.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="bg-purple-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-mobile-alt text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Mobile Friendly</h3>
+                    <p class="text-gray-600">Works perfectly on all devices - desktop, tablet, and mobile.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-file-pdf text-blue-400 text-2xl"></i>
+                        <h2 class="text-2xl font-bold">SwiftPDF Tools</h2>
+                    </div>
+                    <p class="text-gray-400 mt-2">Professional PDF utilities right in your browser</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-gray-400">Built with <i class="fas fa-heart text-red-400"></i> for the developer community</p>
+                    <p class="text-gray-400 text-sm mt-1">© 2023 SwiftPDF Tools. All client-side processing.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
