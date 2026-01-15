@@ -17,50 +17,84 @@ async function handleCompress() {
     }
 
     const file = fileInput.files[0];
-    updateStatus("Optimizing PDF Structure...");
+    const arrayBuffer = await file.arrayBuffer();
 
     try {
-        const arrayBuffer = await file.arrayBuffer();
-        
-        // මෙවර අපි භාවිතා කරන්නේ pdf-lib (Structure එක රැක ගැනීමට)
-        // මේ සඳහා index.html හි head එකට පහත script එක ඇති බව සහතික කරගන්න:
-        // <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-        
-        const { PDFDocument } = PDFLib;
-        const pdfDoc = await PDFDocument.load(arrayBuffer);
-        
-        // 1. අනවශ්‍ය Metadata ඉවත් කිරීම (Size අඩු කිරීමට ප්‍රධාන පියවරක්)
-        pdfDoc.setTitle("");
-        pdfDoc.setAuthor("");
-        pdfDoc.setSubject("");
-        pdfDoc.setCreator("");
-
-        // 2. Slider එකේ අගය අනුව Compression settings තීරණය කිරීම
-        // 'useObjectStreams' මගින් මුල් ගොනුවේ ගුණාත්මකභාවයට හානි නොකර size එක අඩු කරයි
-        const shouldCompressStreams = (compLevel >= 2); 
-
-        const compressedBytes = await pdfDoc.save({
-            useObjectStreams: shouldCompressStreams,
-            addDefaultPage: false,
-            preserveRawResponses: false
-        });
-
-        const pdfBlob = new Blob([compressedBytes], { type: "application/pdf" });
-        const finalSize = (pdfBlob.size / 1024).toFixed(2);
-        
-        // පරීක්ෂාව: මුල් ගොනුවට වඩා විශාල නම් මුල් ගොනුවම ලබා දෙන්න
-        if (pdfBlob.size >= file.size && compLevel == 1) {
-            updateStatus("Original is already optimized!", false);
-            downloadFile(new Blob([arrayBuffer]), file.name);
+        if (compLevel === "3") {
+            // ULTRA MODE: 199KB සඳහා පිටු පින්තූර බවට හරවයි (Flattening)
+            updateStatus("Ultra Mode: Scaling DPI to minimum...");
+            await compressUltra(arrayBuffer);
         } else {
-            updateStatus(`Done! Optimized to: ${finalSize} KB`);
-            downloadFile(pdfBlob, `SwiftPDF_Optimized_${file.name}`);
+            // LEVEL 1 & 2: අකුරු වල පැහැදිලි බව (Vector) ආරක්ෂා කර Compress කරයි
+            updateStatus("Optimization Mode: Preserving Text Quality...");
+            await compressVector(arrayBuffer, compLevel);
         }
-
     } catch (err) {
-        console.error("Compression Error:", err);
+        console.error(err);
         updateStatus("Error: " + err.message, true);
     }
+}
+
+// 1. Quality එක ආරක්ෂා කරන ක්‍රමය (Level 1 & 2)
+async function compressVector(buffer, level) {
+    const { PDFDocument } = PDFLib;
+    const pdfDoc = await PDFDocument.load(buffer);
+    
+    // අනවශ්‍ය දත්ත ඉවත් කිරීම
+    pdfDoc.setTitle("");
+    pdfDoc.setAuthor("");
+    
+    const compressedBytes = await pdfDoc.save({
+        useObjectStreams: true, // ව්‍යුහය ප්‍රශස්ත කරයි
+        addDefaultPage: false
+    });
+
+    const blob = new Blob([compressedBytes], { type: "application/pdf" });
+    if (blob.size >= buffer.byteLength && level == "1") {
+        updateStatus("Already Optimized!");
+        downloadFile(new Blob([buffer]), "Original_Optimized.pdf");
+    } else {
+        finishDownload(blob);
+    }
+}
+
+// 2. 199KB සඳහා වන Ultra ක්‍රමය (Level 3)
+async function compressUltra(buffer) {
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    const { jsPDF } = window.jspdf;
+    const outPdf = new jsPDF('p', 'mm', 'a4');
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+        updateStatus(`Ultra Compressing: Page ${i}...`);
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 0.6 }); // DPI ගොඩක් අඩු කරයි
+        
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        await page.render({ canvasContext: context, viewport: viewport }).promise;
+        const imgData = canvas.toDataURL('image/jpeg', 0.15); // Quality එක ගොඩක් අඩු කරයි
+        
+        if (i > 1) outPdf.addPage();
+        outPdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+        canvas.remove();
+    }
+    finishDownload(outPdf.output('blob'));
+}
+
+function finishDownload(blob) {
+    const size = (blob.size / 1024).toFixed(2);
+    updateStatus(`Success! Size: ${size} KB`);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `SwiftPDF_Result_${size}KB.pdf`;
+    a.click();
 }
 
 function downloadFile(blob, name) {
@@ -68,7 +102,5 @@ function downloadFile(blob, name) {
     const a = document.createElement("a");
     a.href = url;
     a.download = name;
-    document.body.appendChild(a);
     a.click();
-    setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 100);
 }
