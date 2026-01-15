@@ -1,67 +1,308 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF Toolkit</title>
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- jsPDF v2.5.1 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <!-- pdf-lib v1.17.1 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-
-  <!-- pdf.js (latest stable) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.min.js"></script>
-
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftPDF Pro - High-Performance PDF Tools</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
 </head>
-
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-
-  <!-- Header -->
-  <header class="p-4 flex justify-between items-center">
-    <h1 class="text-xl font-bold">📄 PDF Toolkit</h1>
-    <button id="themeToggle" class="px-3 py-1 rounded bg-gray-800 text-white dark:bg-yellow-400 dark:text-black">
-      Toggle Theme
-    </button>
-  </header>
-
-  <!-- Status Area -->
-  <div id="status" class="text-center text-sm py-2"></div>
-
-  <!-- Tools -->
-  <main class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-
-    <!-- Image to PDF -->
-    <div class="card">
-      <h2>🖼️ Image → PDF</h2>
-      <input type="file" id="imgInput" multiple accept="image/*" />
-      <button onclick="imageToPDF()">Convert</button>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen transition-colors duration-300">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10">
+            <div class="flex items-center space-x-3 mb-6 md:mb-0">
+                <div class="bg-blue-600 dark:bg-blue-500 p-3 rounded-2xl shadow-lg">
+                    <i class="fas fa-file-pdf text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold">SwiftPDF Pro</h1>
+                    <p class="text-gray-600 dark:text-gray-400">High-Performance PDF Utilities</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm">Dark Mode</span>
+                    <button id="themeToggle" class="relative w-14 h-7 bg-gray-300 dark:bg-gray-700 rounded-full shadow-inner">
+                        <div class="toggle-circle absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300"></div>
+                    </button>
+                </div>
+                
+                <a href="https://github.com" target="_blank" class="bg-gray-800 dark:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+            </div>
+        </header>
+        
+        <!-- Main Dashboard -->
+        <main>
+            <!-- Stats Banner -->
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 mb-10 text-white shadow-xl">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">Advanced PDF Processing</h2>
+                        <p class="opacity-90">Compress, convert and optimize PDF files with our high-performance tools</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 flex items-center space-x-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold">90%</div>
+                            <div class="text-sm opacity-90">Size Reduction</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold">100%</div>
+                            <div class="text-sm opacity-90">Client-Side</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold">∞</div>
+                            <div class="text-sm opacity-90">No Limits</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tools Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <!-- PDF Compressor Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="bg-gradient-to-r from-green-500 to-teal-500 p-5 text-white">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-2xl font-bold"><i class="fas fa-compress-alt mr-2"></i> PDF Compressor</h3>
+                            <span class="bg-white text-teal-600 text-xs font-bold px-3 py-1 rounded-full">TOP PRIORITY</span>
+                        </div>
+                        <p class="mt-2 opacity-90">Advanced compression with image optimization</p>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="mb-6">
+                            <label class="block mb-2 font-medium">Compression Level</label>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm">Low (Better Quality)</span>
+                                <span class="text-sm">High (Smaller Size)</span>
+                            </div>
+                            <input type="range" id="compressionLevel" min="1" max="3" value="2" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-xs mt-1">
+                                <span class="text-green-600 font-medium">Low</span>
+                                <span class="text-yellow-600 font-medium">Medium</span>
+                                <span class="text-red-600 font-medium">High</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block mb-2 font-medium">Compression Progress</label>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                                <div id="compressionProgress" class="bg-gradient-to-r from-green-400 to-teal-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-sm mt-2">
+                                <span id="progressText">Waiting for file...</span>
+                                <span id="progressPercent">0%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <p class="mb-2">Drag & drop your PDF file here</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">or click to browse</p>
+                                <input type="file" id="compressInput" accept=".pdf" class="hidden">
+                                <button id="compressBtn" class="mt-4 bg-gradient-to-r from-green-500 to-teal-600 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full">
+                                    <i class="fas fa-file-import mr-2"></i> Select PDF File
+                                </button>
+                            </div>
+                            
+                            <button id="compressExecute" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fas fa-bolt mr-2"></i> Compress PDF
+                            </button>
+                            
+                            <div id="compressResult" class="hidden">
+                                <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                                    <h4 class="font-bold mb-2">Compression Result</h4>
+                                    <div class="flex justify-between mb-4">
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-green-600" id="originalSize">--</div>
+                                            <div class="text-sm">Original</div>
+                                        </div>
+                                        <div class="self-center">
+                                            <i class="fas fa-arrow-right text-gray-400"></i>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-teal-600" id="compressedSize">--</div>
+                                            <div class="text-sm">Compressed</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-blue-600" id="savingsPercent">--</div>
+                                            <div class="text-sm">Savings</div>
+                                        </div>
+                                    </div>
+                                    <button id="downloadCompressed" class="bg-gradient-to-r from-teal-500 to-green-600 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full">
+                                        <i class="fas fa-download mr-2"></i> Download Compressed PDF
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image to PDF Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="bg-gradient-to-r from-orange-500 to-red-500 p-5 text-white">
+                        <h3 class="text-2xl font-bold"><i class="fas fa-file-image mr-2"></i> Image to PDF</h3>
+                        <p class="mt-2 opacity-90">Convert multiple images to a single PDF</p>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="mb-6">
+                            <label class="block mb-2 font-medium">Page Layout</label>
+                            <select id="pageLayout" class="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg">
+                                <option value="portrait">Portrait</option>
+                                <option value="landscape">Landscape</option>
+                                <option value="auto">Auto (Match Images)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center">
+                                <i class="fas fa-images text-4xl text-gray-400 mb-4"></i>
+                                <p class="mb-2">Select multiple images (JPG, PNG, WebP)</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Supports up to 20 images</p>
+                                <input type="file" id="imagesInput" accept=".jpg,.jpeg,.png,.webp" multiple class="hidden">
+                                <button id="imagesBtn" class="mt-4 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full">
+                                    <i class="fas fa-plus mr-2"></i> Select Images
+                                </button>
+                            </div>
+                            
+                            <div id="imagePreview" class="hidden">
+                                <h4 class="font-bold mb-2">Selected Images</h4>
+                                <div id="imageList" class="mb-4 max-h-40 overflow-y-auto bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                                    <!-- Images will be listed here -->
+                                </div>
+                            </div>
+                            
+                            <button id="convertToPdf" class="bg-gradient-to-r from-red-500 to-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fas fa-file-pdf mr-2"></i> Convert to PDF
+                            </button>
+                            
+                            <div id="pdfResult" class="hidden">
+                                <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                                    <h4 class="font-bold mb-2">PDF Created</h4>
+                                    <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                                            <div>
+                                                <div class="font-medium" id="pdfPageCount">0 pages</div>
+                                                <div class="text-sm text-gray-500 dark:text-gray-400" id="pdfFileSize">--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button id="downloadPdf" class="bg-gradient-to-r from-red-500 to-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full">
+                                        <i class="fas fa-download mr-2"></i> Download PDF
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PDF to Image Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-5 text-white">
+                        <h3 class="text-2xl font-bold"><i class="fas fa-image mr-2"></i> PDF to Image</h3>
+                        <p class="mt-2 opacity-90">Extract PDF pages as images</p>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="mb-6">
+                            <label class="block mb-2 font-medium">Image Format</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="imageFormat" value="jpg" checked class="mr-2">
+                                    <span>JPG</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="imageFormat" value="png" class="mr-2">
+                                    <span>PNG</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="imageFormat" value="webp" class="mr-2">
+                                    <span>WebP</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center">
+                                <i class="fas fa-file-pdf text-4xl text-gray-400 mb-4"></i>
+                                <p class="mb-2">Select a PDF file to convert</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Each page will become an image</p>
+                                <input type="file" id="pdfToImageInput" accept=".pdf" class="hidden">
+                                <button id="pdfToImageBtn" class="mt-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full">
+                                    <i class="fas fa-file-import mr-2"></i> Select PDF File
+                                </button>
+                            </div>
+                            
+                            <div id="pdfInfo" class="hidden">
+                                <h4 class="font-bold mb-2">PDF Information</h4>
+                                <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <div class="flex justify-between">
+                                        <span>Pages:</span>
+                                        <span id="pdfPageCountInfo">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button id="extractImages" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fas fa-images mr-2"></i> Extract Images
+                            </button>
+                            
+                            <div id="extractResult" class="hidden">
+                                <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                                    <h4 class="font-bold mb-2">Images Extracted</h4>
+                                    <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                                            <div>
+                                                <div class="font-medium" id="extractedCount">0 images</div>
+                                                <div class="text-sm text-gray-500 dark:text-gray-400">Click on images to download</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="extractedImages" class="grid grid-cols-2 gap-2 mb-4 max-h-60 overflow-y-auto">
+                                        <!-- Extracted images will be added here -->
+                                    </div>
+                                    <button id="downloadAllImages" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full">
+                                        <i class="fas fa-download mr-2"></i> Download All as ZIP
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="text-center text-gray-600 dark:text-gray-400 text-sm border-t border-gray-200 dark:border-gray-800 pt-8 mt-8">
+                <p>SwiftPDF Pro &copy; <span id="currentYear"></span> | High-performance PDF utilities running entirely in your browser.</p>
+                <p class="mt-2">Powered by pdf-lib, jsPDF, and PDF.js | No data is sent to any server</p>
+            </footer>
+        </main>
     </div>
 
-    <!-- PDF Compressor -->
-    <div class="card">
-      <h2>🗜️ Compress PDF</h2>
-      <input type="file" id="compressInput" accept="application/pdf" />
-      <button onclick="compressPDF()">Compress</button>
-    </div>
-
-    <!-- PDF to Image -->
-    <div class="card">
-      <h2>📄 PDF → Image</h2>
-      <input type="file" id="pdfImageInput" accept="application/pdf" />
-      <button onclick="pdfToImage()">Convert</button>
-    </div>
-
-  </main>
-
-  <!-- Hidden Canvas -->
-  <canvas id="hiddenCanvas" class="hidden"></canvas>
-
-  <script src="script.js"></script>
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <!-- Main Script -->
+    <script src="script.js"></script>
+    
+    <script>
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
