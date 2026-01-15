@@ -13,53 +13,45 @@ document.getElementById('compLevel').addEventListener('input', function() {
     document.getElementById('levelDisplay').innerText = labels[this.value];
 });
 
-// --- TOOL 1: PDF COMPRESSOR ---
+// --- TOOL 1: PDF COMPRESSOR (Smart Sharp-Text Logic) ---
 async function handleCompress() {
     const fileInput = document.getElementById('pdfInput');
     const compLevel = document.getElementById('compLevel').value;
     if (!fileInput.files[0]) return alert("Please select a PDF!");
 
-    updateStatus("Processing Compressor...");
+    updateStatus("අකුරු වල පැහැදිලි බව සුරකිමින් පවතී...");
     const arrayBuffer = await fileInput.files[0].arrayBuffer();
-    
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const { jsPDF } = window.jspdf;
-    
-    // Create new PDF with internal compression enabled
-    const outPdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4', compress: true });
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-        updateStatus(`Compressing Page ${i}/${pdf.numPages}...`);
-        const page = await pdf.getPage(i);
-        
-        // Smart Scaling Logic for clarity vs size
-        let scale = (compLevel === "3") ? 1.2 : 1.8;
-        let quality = (compLevel === "3") ? 0.25 : 0.6;
+    try {
+        // අකුරු පැහැදිලිව තබා ගැනීමට pdf-lib භාවිතා කරයි
+        const { PDFDocument } = PDFLib;
+        const pdfDoc = await PDFDocument.load(arrayBuffer);
 
-        const viewport = page.getViewport({ scale: scale });
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        // 1. Metadata ඉවත් කිරීම (Size අඩු කිරීමට)
+        pdfDoc.setTitle("");
+        pdfDoc.setAuthor("");
+        pdfDoc.setProducer("");
 
-        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-        const imgData = canvas.toDataURL('image/jpeg', quality);
+        // 2. Ultra Mode එකේදී පවා අකුරු බොඳ නොවන සේ 
+        // අභ්‍යන්තර ව්‍යුහය පමණක් Compress කිරීම
+        const useObjectStreams = compLevel >= "2"; 
+
+        const compressedBytes = await pdfDoc.save({
+            useObjectStreams: useObjectStreams,
+            addDefaultPage: false,
+            preserveRawResponses: false
+        });
+
+        const blob = new Blob([compressedBytes], { type: 'application/pdf' });
+        const sizeKB = (blob.size / 1024).toFixed(2);
         
-        if (i > 1) outPdf.addPage();
-        outPdf.addImage(imgData, 'JPEG', 0, 0, outPdf.internal.pageSize.getWidth(), outPdf.internal.pageSize.getHeight(), undefined, 'MEDIUM');
-        canvas.remove();
+        updateStatus(`Success! Text is 100% Sharp. Size: ${sizeKB} KB`);
+        downloadFile(blob, `SwiftPDF_Sharp_${sizeKB}KB.pdf`);
+
+    } catch (err) {
+        console.error(err);
+        updateStatus("Compression Error: Use a Standard PDF", true);
     }
-    
-    const blob = outPdf.output('blob');
-    const sizeKB = (blob.size / 1024).toFixed(2);
-    updateStatus(`Success! Final Size: ${sizeKB} KB`);
-    downloadFile(blob, `SwiftPDF_Compressed_${sizeKB}KB.pdf`);
 }
 
 // --- TOOL 2: IMAGE TO PDF ---
@@ -78,17 +70,17 @@ async function handleImgToPdf() {
             reader.readAsDataURL(input.files[i]);
         });
         if (i > 0) pdf.addPage();
-        pdf.addImage(dataUrl, 'JPEG', 0, 0, 210, 297);
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
     }
     pdf.save("SwiftPDF_Images.pdf");
-    updateStatus("Images Converted Successfully!");
+    updateStatus("Images Converted!");
 }
 
 // --- TOOL 3: PDF TO IMAGE ---
 async function handlePdfToImg() {
     const input = document.getElementById('pdfToImgInput');
     if (!input.files[0]) return alert("Select a PDF file!");
-    updateStatus("Extracting Pages as Images...");
+    updateStatus("Extracting Pages as High-Res Images...");
     
     const buffer = await input.files[0].arrayBuffer();
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
@@ -96,7 +88,8 @@ async function handlePdfToImg() {
 
     for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 2.0 });
+        // Scale 2.5 මගින් පින්තූරයේ පැහැදිලි බව වැඩි කරයි
+        const viewport = page.getViewport({ scale: 2.5 });
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         canvas.height = viewport.height;
@@ -105,11 +98,11 @@ async function handlePdfToImg() {
         await page.render({ canvasContext: ctx, viewport: viewport }).promise;
         
         const link = document.createElement('a');
-        link.download = `Page_${i}.jpg`;
-        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.download = `Page_${i}_HighRes.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 0.95);
         link.click();
     }
-    updateStatus("All Pages Extracted!");
+    updateStatus("All High-Res Images Saved!");
 }
 
 // Helper: Download function
