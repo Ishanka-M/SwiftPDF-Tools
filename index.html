@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftPDF Pro | Multi-Tool Edition</title>
+    <title>SwiftPDF Pro | All-In-One Toolkit</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -19,10 +20,10 @@
         </div>
     </nav>
 
-    <main class="container mx-auto py-10 px-4 max-w-4xl space-y-8">
+    <main class="container mx-auto py-10 px-4 max-w-4xl space-y-10">
         
         <section class="bg-slate-900/50 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl">
-            <h2 class="text-lg font-bold mb-4">📉 Smart PDF Compressor</h2>
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">📉 <span>Smart PDF Compressor</span></h2>
             <div id="dropZone" class="border-2 border-dashed border-slate-700 rounded-2xl p-10 text-center hover:border-blue-500 hover:bg-blue-500/5 transition-all cursor-pointer mb-6">
                 <p class="text-slate-400 text-sm">PDF එක මෙතනට <b>Drag & Drop</b> කරන්න හෝ Click කරන්න</p>
                 <input type="file" id="pdfInput" accept="application/pdf" class="hidden">
@@ -33,25 +34,52 @@
                 <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
                     <div class="flex justify-between mb-2">
                         <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">DPI Optimization</span>
-                        <span id="levelDisplay" class="text-[10px] font-black text-emerald-400">MEDIUM</span>
+                        <span id="levelDisplay" class="text-[10px] font-black text-emerald-400 uppercase">Medium</span>
                     </div>
                     <input type="range" id="compLevel" min="1" max="3" step="1" value="2" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
                 </div>
-                <button onclick="handleCompress()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-lg shadow-lg transition-all active:scale-95">COMPRESS PDF</button>
+                <button onclick="handleCompress()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-sm shadow-lg transition-all active:scale-95 uppercase">Compress PDF</button>
             </div>
         </section>
 
-        <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
-                <h3 class="font-bold mb-4 text-sm">🖼️ Image to PDF</h3>
+        <section class="bg-slate-900/50 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl">
+            <h2 class="text-lg font-bold mb-4 italic">✍️ PDF Content Editor</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">1. Select PDF to Edit</label>
+                    <input type="file" id="editPdfInput" accept="application/pdf" class="text-xs text-slate-500 w-full bg-slate-800/50 p-3 rounded-xl border border-slate-700">
+                    
+                    <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50 space-y-3">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">2. Add Text & Position (X, Y)</label>
+                        <input type="text" id="addTextInput" placeholder="ලිවිය යුතු දේ මෙතන ලියන්න..." class="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm outline-none focus:border-blue-500">
+                        <div class="flex gap-2">
+                            <input type="number" id="posX" placeholder="X" value="50" class="w-1/2 bg-slate-900 border border-slate-700 p-2 rounded-lg text-xs">
+                            <input type="number" id="posY" placeholder="Y" value="50" class="w-1/2 bg-slate-900 border border-slate-700 p-2 rounded-lg text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 flex flex-col justify-between">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">3. Add Image/Signature (Optional)</label>
+                        <input type="file" id="editImgInput" accept="image/*" class="text-xs text-slate-500 w-full bg-slate-800/50 p-3 rounded-xl border border-slate-700">
+                    </div>
+                    <button onclick="handleEditPdf()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-bold text-sm shadow-lg transition-all active:scale-95 uppercase">Apply Edits & Save</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid md:grid-cols-2 gap-6 pb-10">
+            <div class="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                <h3 class="font-bold mb-4 text-sm flex items-center gap-2">🖼️ Image to PDF</h3>
                 <input type="file" id="imgInput" multiple accept="image/*" class="text-xs text-slate-500 mb-4 block w-full">
-                <button onclick="handleImgToPdf()" class="w-full bg-slate-800 hover:bg-emerald-600 py-3 rounded-xl text-xs font-bold transition-all uppercase">Convert to PDF</button>
+                <button onclick="handleImgToPdf()" class="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest border border-slate-700">Convert to PDF</button>
             </div>
 
-            <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
-                <h3 class="font-bold mb-4 text-sm">📸 PDF to Image</h3>
+            <div class="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                <h3 class="font-bold mb-4 text-sm flex items-center gap-2">📸 PDF to Image</h3>
                 <input type="file" id="pdfToImgInput" accept="application/pdf" class="text-xs text-slate-500 mb-4 block w-full">
-                <button onclick="handlePdfToImg()" class="w-full bg-slate-800 hover:bg-purple-600 py-3 rounded-xl text-xs font-bold transition-all uppercase">Extract Images</button>
+                <button onclick="handlePdfToImg()" class="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest border border-slate-700">Extract Images</button>
             </div>
         </div>
     </main>
