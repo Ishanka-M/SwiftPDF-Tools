@@ -1,6 +1,7 @@
 // Function to update the status bar
 const updateStatus = (msg, isError = false) => {
     const el = document.getElementById('statusIndicator');
+    if (!el) return;
     el.innerText = msg;
     el.className = isError 
         ? "status-badge border-red-500 text-red-400 bg-red-900/20" 
@@ -8,10 +9,13 @@ const updateStatus = (msg, isError = false) => {
 };
 
 // Sync slider labels
-document.getElementById('compLevel').addEventListener('input', function() {
-    const labels = { "1": "LOW (Best Quality)", "2": "MEDIUM (Balanced)", "3": "ULTRA (Target 199KB)" };
-    document.getElementById('levelDisplay').innerText = labels[this.value];
-});
+const levelEl = document.getElementById('compLevel');
+if (levelEl) {
+    levelEl.addEventListener('input', function() {
+        const labels = { "1": "LOW (Best Quality)", "2": "MEDIUM (Balanced)", "3": "ULTRA (Target 199KB)" };
+        document.getElementById('levelDisplay').innerText = labels[this.value];
+    });
+}
 
 // --- TOOL 1: PDF COMPRESSOR (Smart Sharp-Text Logic) ---
 async function handleCompress() {
@@ -27,17 +31,14 @@ async function handleCompress() {
         const { PDFDocument } = PDFLib;
         const pdfDoc = await PDFDocument.load(arrayBuffer);
 
-        // 1. Metadata ඉවත් කිරීම (Size අඩු කිරීමට)
+        // Metadata ඉවත් කිරීම (Size අඩු කිරීමට)
         pdfDoc.setTitle("");
         pdfDoc.setAuthor("");
         pdfDoc.setProducer("");
 
-        // 2. Ultra Mode එකේදී පවා අකුරු බොඳ නොවන සේ 
-        // අභ්‍යන්තර ව්‍යුහය පමණක් Compress කිරීම
-        const useObjectStreams = compLevel >= "2"; 
-
+        // Native Compression: අකුරු වලට හානි නොකර අභ්‍යන්තර ව්‍යුහය පමණක් Compress කරයි
         const compressedBytes = await pdfDoc.save({
-            useObjectStreams: useObjectStreams,
+            useObjectStreams: true, // අකුරු වල Sharpness එක ආරක්ෂා කරයි
             addDefaultPage: false,
             preserveRawResponses: false
         });
@@ -50,7 +51,7 @@ async function handleCompress() {
 
     } catch (err) {
         console.error(err);
-        updateStatus("Compression Error: Use a Standard PDF", true);
+        updateStatus("Compression Error! Use a proper PDF file.", true);
     }
 }
 
@@ -73,22 +74,24 @@ async function handleImgToPdf() {
         pdf.addImage(dataUrl, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
     }
     pdf.save("SwiftPDF_Images.pdf");
-    updateStatus("Images Converted!");
+    updateStatus("Images Converted Successfully!");
 }
 
 // --- TOOL 3: PDF TO IMAGE ---
 async function handlePdfToImg() {
     const input = document.getElementById('pdfToImgInput');
     if (!input.files[0]) return alert("Select a PDF file!");
-    updateStatus("Extracting Pages as High-Res Images...");
+    updateStatus("Extracting High-Res Images...");
     
     const buffer = await input.files[0].arrayBuffer();
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    
     const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
 
     for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        // Scale 2.5 මගින් පින්තූරයේ පැහැදිලි බව වැඩි කරයි
+        // පැහැදිලි පින්තූර සඳහා scale 2.5 භාවිතා කරයි
         const viewport = page.getViewport({ scale: 2.5 });
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -98,11 +101,11 @@ async function handlePdfToImg() {
         await page.render({ canvasContext: ctx, viewport: viewport }).promise;
         
         const link = document.createElement('a');
-        link.download = `Page_${i}_HighRes.jpg`;
+        link.download = `Page_${i}_HighQuality.jpg`;
         link.href = canvas.toDataURL('image/jpeg', 0.95);
         link.click();
     }
-    updateStatus("All High-Res Images Saved!");
+    updateStatus("All Pages Extracted as Images!");
 }
 
 // Helper: Download function
