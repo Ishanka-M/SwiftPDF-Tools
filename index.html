@@ -3,110 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwiftPDF Pro | Ultra Sharp Text Compressor</title>
-    
+    <title>SwiftPDF Pro | Drag & Drop Edition</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-    <style>
-        body { 
-            background-color: #0f172a; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .status-badge {
-            font-size: 10px; font-weight: bold; padding: 4px 12px;
-            border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.1em;
-        }
-        /* Custom Styling for the range slider */
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 18px; width: 18px;
-            border-radius: 50%;
-            background: #10b981;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-        }
-    </style>
 </head>
-<body class="text-slate-200 min-h-screen">
+<body class="bg-slate-950 text-slate-200">
 
     <nav class="p-6 border-b border-slate-800 bg-slate-900/80 sticky top-0 z-50">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent italic">
-                SWIFTPDF PRO
-            </h1>
-            <div id="statusIndicator" class="status-badge bg-slate-800 text-slate-400 border border-slate-700">
-                System Ready
-            </div>
+            <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent italic">SWIFTPDF PRO</h1>
+            <div id="statusIndicator" class="px-4 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-800 text-slate-400 border border-slate-700">System Ready</div>
         </div>
     </nav>
 
     <main class="container mx-auto py-10 px-4 max-w-4xl">
         
-        <section class="glass-card p-8 rounded-[2rem] shadow-2xl mb-10 border-t-4 border-t-blue-500">
-            <div class="mb-6">
-                <h2 class="text-xl font-bold flex items-center">
-                    <span class="mr-3">📉</span> Native PDF Compressor
-                </h2>
-                <p class="text-xs text-slate-400 mt-1">අකුරු වල පැහැදිලි බව 100% ක් ආරක්ෂා කරන Vector Optimization තාක්ෂණය.</p>
-            </div>
+        <section class="bg-slate-900 border border-slate-800 p-8 rounded-[2rem] shadow-2xl mb-10">
+            <h2 class="text-xl font-bold mb-6 flex items-center">📉 Sharp PDF Compressor</h2>
             
+            <div id="dropZone" class="border-2 border-dashed border-slate-700 rounded-2xl p-10 text-center hover:border-blue-500 hover:bg-blue-500/5 transition-all cursor-pointer mb-6">
+                <p class="text-slate-400">PDF එක මෙතනට <b>Drag & Drop</b> කරන්න හෝ මෙතන Click කරන්න</p>
+                <input type="file" id="pdfInput" accept="application/pdf" class="hidden">
+                <p id="fileNameDisplay" class="mt-3 text-blue-400 font-bold text-sm"></p>
+            </div>
+
             <div class="grid md:grid-cols-2 gap-8">
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Select Your PDF File</label>
-                        <input type="file" id="pdfInput" accept="application/pdf" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+                <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-bold text-slate-300">Compression Level</span>
+                        <span id="levelDisplay" class="text-[10px] font-black text-emerald-400">MEDIUM</span>
                     </div>
-                    
-                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-xs font-bold text-slate-300">Compression Power</span>
-                            <span id="levelDisplay" class="text-[10px] font-black text-emerald-400 uppercase">Medium (Balanced)</span>
-                        </div>
-                        <input type="range" id="compLevel" min="1" max="3" step="1" value="2" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
-                    </div>
+                    <input type="range" id="compLevel" min="1" max="3" step="1" value="2" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
                 </div>
-                
-                <div class="flex flex-col justify-end">
-                    <button onclick="handleCompress()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-black text-lg transition-all shadow-lg shadow-blue-600/20 active:scale-95">
-                        COMPRESS & DOWNLOAD
-                    </button>
-                    <div class="mt-4 flex items-start gap-2 p-3 bg-blue-500/5 rounded-lg border border-blue-500/10">
-                        <span class="text-blue-400 text-xs">ℹ️</span>
-                        <p class="text-[10px] text-slate-500 leading-tight">
-                            මෙම ක්‍රමය මගින් PDF එකේ අභ්‍යන්තර දත්ත (Internal objects) ප්‍රශස්ත කරන නිසා අකුරු සහ වගු වල ඉලක්කම් බොඳ නොවේ.
-                        </p>
-                    </div>
-                </div>
+                <button onclick="handleCompress()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-600/20 transition-all active:scale-95">COMPRESS & DOWNLOAD</button>
             </div>
         </section>
 
         <div class="grid md:grid-cols-2 gap-6">
-            <div class="glass-card p-6 rounded-2xl hover:border-emerald-500/30 transition-all group">
-                <h3 class="font-bold mb-4 flex items-center text-sm">
-                    <span class="mr-2 group-hover:scale-110 transition-transform">🖼️</span> Image to PDF
-                </h3>
-                <input type="file" id="imgInput" multiple accept="image/*" class="text-[10px] text-slate-500 mb-4 w-full">
-                <button onclick="handleImgToPdf()" class="w-full bg-slate-800 hover:bg-emerald-600 py-3 rounded-lg text-[11px] font-bold transition-all uppercase tracking-wider">Convert to PDF</button>
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+                <h3 class="font-bold mb-4">🖼️ Image to PDF</h3>
+                <input type="file" id="imgInput" multiple accept="image/*" class="text-xs text-slate-500 w-full mb-4">
+                <button onclick="handleImgToPdf()" class="w-full bg-slate-800 hover:bg-emerald-600 py-3 rounded-xl text-xs font-bold transition-all">Convert</button>
             </div>
-
-            <div class="glass-card p-6 rounded-2xl hover:border-purple-500/30 transition-all group">
-                <h3 class="font-bold mb-4 flex items-center text-sm">
-                    <span class="mr-2 group-hover:scale-110 transition-transform">📸</span> PDF to Image
-                </h3>
-                <input type="file" id="pdfToImgInput" accept="application/pdf" class="text-[10px] text-slate-500 mb-4 w-full">
-                <button onclick="handlePdfToImg()" class="w-full bg-slate-800 hover:bg-purple-600 py-3 rounded-lg text-[11px] font-bold transition-all uppercase tracking-wider">Extract Pages</button>
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+                <h3 class="font-bold mb-4">📸 PDF to Image</h3>
+                <input type="file" id="pdfToImgInput" accept="application/pdf" class="text-xs text-slate-500 w-full mb-4">
+                <button onclick="handlePdfToImg()" class="w-full bg-slate-800 hover:bg-purple-600 py-3 rounded-xl text-xs font-bold transition-all">Extract JPG</button>
             </div>
         </div>
-
     </main>
 
     <script src="script.js"></script>
